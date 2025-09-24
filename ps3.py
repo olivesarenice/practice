@@ -26,14 +26,17 @@ titles = {
     "Berlin": {
         "title": "Berlin",
         "url": "https://www.wikipedia.com/Berlin",
+        "popularity": 99.9,
     },
     "Berlin!": {
         "title": "Berlin!",
         "url": "https://www.wikipedia.com/Berlin%21",
+        "popularity": 10.5,
     },
     "BurgerBar": {
         "title": "BurgerBar",
         "url": "https://www.wikipedia.com/BurgerBar",
+        "popularity": 95.1,
     },
 }
 
@@ -119,6 +122,53 @@ def generate_cache(title_map):
 
 
 cache = generate_cache(title_map)
+print("naive cache")
+print(cache)
+
+"""
+Not all suggestions are equal. 
+We have data on how popular each sentence (or search query) is. 
+How would you enhance your system to show the most relevant suggestions first, for example, 
+the top 3 most popular matches for what the user has typed?
+"""
+
+# when generating the cache across all search terms, we want to re-rank each list by the popularity
+
+
+def generate_popularity_cache(title_map):
+    cache = defaultdict(list)
+    # loop through each possible search term
+    for term in title_map.keys():
+        print(term)
+        # then go through increasing letter in the title map
+        partial_term = ""
+        for l in term:
+            partial_term += l
+            print(partial_term)
+            results = get_top_n_matches(partial_term, n=-1)  # no limit
+            for r in results:
+                matched_term = r[0]  # just take the matching term
+
+                # in this case, let's append the exact title, and not just the matched term
+                exact_matched_titles = title_map[matched_term]
+                cache[partial_term].extend(exact_matched_titles)
+
+            # after we are done for the term `ber`:
+            # rerank by popularity
+            reranked = cache.get(partial_term)
+            reranked = list(set(reranked))  # remove duplicates
+            reranked.sort(
+                reverse=True,
+                key=lambda x: titles[x][
+                    "popularity"
+                ],  # go back to the original title list with popularity
+            )  # reverse it since the most popular will have the largest key value
+            cache[partial_term] = reranked
+    return cache
+
+
+cache = generate_popularity_cache(title_map)
+print("with popularity ranking")
 print(cache)
 
 # MAIN LOOP
@@ -127,3 +177,9 @@ while True:
     search_bar = input("SEARCH BAR: ")
     top_n_results = get_top_n_matches(search_bar, use_cache=True)
     [print(f"{i+1}: {r}") for i, r in enumerate(top_n_results)]
+
+# Reivew: this was an easier one, since it is simply sorting, dictionary access, and iterating through strings.
+# A very useful structure is the defaultdict(list) which makes it easy to track keys --> list automatically
+# For text matching tasks, very handy to remember this combi: cleaned = re.sub(r"[^A-Za-z0-9 ]", "", k.lower())
+# this removes special characters and lowercases the text for clean matching.
+# and lastly, the .sort(key=lambda x: dict_containing_sort_values[x]) is handy for sorting by refering to another dict!
