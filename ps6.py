@@ -119,3 +119,11 @@ Let's introduce a placement rule: a new block cannot be the same color as any of
 # first i would need to know what the i (col), j (stack-row) coords is of the block 
 # then check i-1, i+1 (horizontal adjacanets)
 # then check j-1 (vertical below). no need to check j+1 since there cannot be any blocks above the incoming block.
+
+
+# REVIEW
+# It was relatively easy to set up the Board and Column objects, but again I accounted for too many things - like self.stack, instead of just using a list. etc. I need to ONLY create additional nesting and attributes when I encounter the need. Otherwise, it may be too many things to properly track in a short time
+
+# The adjacency checks were slightly confusing, but once I was able to consider the edge cases and what the decision tree was (if at L/R boundaries can ignore) then it was much easier to run the checks.
+
+# GEMINI recommended an easy way to manage 2D arrays by setting the column object and then getting the row using column.get_height() = return len(self.stack)
